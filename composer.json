@@ -1,0 +1,19 @@
+{
+    "name": "jscorptech/atmospay",
+    "autoload": {
+        "psr-4": {
+            "Jscorptech\\Atmospay\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "A'zamov Samandar",
+            "email": "JscorpTech@gmail.com"
+        }
+    ],
+    "require": {
+        "illuminate/support": "^10.0.0",
+        "illuminate/database": "^10.48",
+        "guzzlehttp/guzzle": "^7.9"
+    }
+}
