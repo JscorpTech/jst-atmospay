@@ -5,6 +5,7 @@ namespace JscorpTech\Atmospay\Services;
 
 use Exception;
 use GuzzleHttp\Client;
+use Illuminate\Support\Env;
 use JscorpTech\Atmospay\Exceptions\AtmospayException;
 
 class AtmospayService
@@ -24,11 +25,12 @@ class AtmospayService
         "apply_transaction" => "/merchant/pay/apply-ofd",
         "pre_apply_transaction" => "/merchant/pay/pre-apply"
     ];
-    function __construct($login, $password, $config = [])
+    function __construct($config = [])
     {
         $this->config = $config;
-        $this->login = $login;
-        $this->password = $password;
+        $this->login = Env::get("ATMOSPAY_LOGIN");
+        $this->password = Env::get("ATMOSPAY_PASSWORD");
+        $this->store_id = Env::get("ATMOSPAY_STORE_ID", 0);
         $this->load_config();
         $this->client = $this->get_client();
         $this->auth();
@@ -38,8 +40,6 @@ class AtmospayService
     {
         if (isset($this->config['store_id'])) {
             $this->store_id = $this->config['store_id'];
-        } else {
-            throw new Exception("Store id not found");
         }
         if (isset($this->config['lang'])) {
             $this->lang = $this->config['lang'];

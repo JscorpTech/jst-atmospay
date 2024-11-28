@@ -11,6 +11,7 @@ class Transaction extends Model
     public $fillable = [
         "amount",
         "transaction_id",
-        "status"
+        "status",
+        "account"
     ];
 }

@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->id();
             $table->decimal("amount", 20, 2);
             $table->enum("status", ["pending", "cancel", "done"])->default("pending");
+            $table->bigInteger("account");
             $table->bigInteger("transaction_id");
             $table->timestamps();
         });

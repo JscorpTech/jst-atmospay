@@ -3,6 +3,7 @@
 
 namespace JscorpTech\Atmospay\Views;
 
+use App\Services\PaymentHandlerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Response;
@@ -16,10 +17,7 @@ class AtmospayController
 
     function __construct()
     {
-        $this->service  = new AtmospayService(Env::get("ATMOSPAY_LOGIN"), Env::get("ATMOSPAY_PASSWORD"), [
-            "store_id" => Env::get("ATMOSPAY_STORE_ID", 0),
-            "lang" => "uz"
-        ]);
+        $this->service  = new AtmospayService();
     }
     /**
      * Transaction yaratish
@@ -32,11 +30,12 @@ class AtmospayController
             $transaction_id = $this->service->create_transaction($amount, $account)->transaction_id;
             $transaction = Transaction::query()->create([
                 "amount" => $amount,
-                "transaction_id" => $transaction_id
+                "transaction_id" => $transaction_id,
+                "account" => $account
             ]);
 
             return Response::json([
-                "detail" => _("Transaction created"),
+                "detail" => "Transaction created",
                 "data" => [
                     "transaction_id" => $transaction->id
                 ]
@@ -59,7 +58,7 @@ class AtmospayController
             $transaction = Transaction::query()->where(['id' => $data['transaction_id']])->latest()->first();
             $this->service->pre_apply_transaction($data['card'], $data['expiry'], $transaction->transaction_id);
             return Response::json([
-                "detail" => _("Tasdiqlash ko'di yuborildi")
+                "detail" => "Tasdiqlash ko'di yuborildi"
             ]);
         } catch (AtmospayException $e) {
             return Response::json([
@@ -76,8 +75,11 @@ class AtmospayController
         ]);
         try {
             $transaction = Transaction::query()->where(['id' => $data['transaction_id']])->latest()->first();
-            $response = $this->service->apply_transaction($data['code'], $transaction->transaction_id);
-            return Response::json($response);
+            $this->service->apply_transaction($data['code'], $transaction->transaction_id);
+            (new PaymentHandlerService())->success($transaction->account);
+            return Response::json([
+                "detail" => "To'lov bajarildi"
+            ]);
         } catch (AtmospayException $e) {
             return Response::json([
                 "detail" => $e->getMessage()
